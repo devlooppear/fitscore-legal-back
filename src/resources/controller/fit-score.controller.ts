@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { FitScoreService } from './fit-score.service';
-import { CreateFitScoreDto } from './dto/create-fit-score.dto';
-import { UpdateFitScoreDto } from './dto/update-fit-score.dto';
+import { FitScoreService } from '../service/fit-score.service';
+import { CreateFitScoreDto } from '../dto/create-fit-score.dto';
+import { UpdateFitScoreDto } from '../dto/update-fit-score.dto';
 
 @Controller('fit-score')
 export class FitScoreController {

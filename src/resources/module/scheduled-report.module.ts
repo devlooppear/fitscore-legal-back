@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ScheduledReportService } from './scheduled-report.service';
-import { ScheduledReportController } from './scheduled-report.controller';
+import { ScheduledReportService } from '../service/scheduled-report.service';
+import { ScheduledReportController } from '../controller/scheduled-report.controller';
 
 @Module({
   controllers: [ScheduledReportController],

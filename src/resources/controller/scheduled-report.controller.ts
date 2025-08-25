@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ScheduledReportService } from './scheduled-report.service';
-import { CreateScheduledReportDto } from './dto/create-scheduled-report.dto';
-import { UpdateScheduledReportDto } from './dto/update-scheduled-report.dto';
+import { ScheduledReportService } from '../service/scheduled-report.service';
+import { CreateScheduledReportDto } from '../dto/create-scheduled-report.dto';
+import { UpdateScheduledReportDto } from '../dto/update-scheduled-report.dto';
 
 @Controller('scheduled-report')
 export class ScheduledReportController {
