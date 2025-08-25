@@ -59,3 +59,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# migrations
+src/migrations
+
+.vscode/settings.json
