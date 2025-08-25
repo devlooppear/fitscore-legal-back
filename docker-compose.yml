@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:15
+    container_name: fitscore-db
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_URL: ${DATABASE_URL}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
