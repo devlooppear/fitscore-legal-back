@@ -6,6 +6,7 @@ import { typeOrmConfig } from './config/database.config';
 import { UsersModule } from './resources/users/users.module';
 import { AuthModule } from './resources/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { FitscoreModule } from './resources/fitscore/fitscore.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     UsersModule,
     AuthModule,
+    FitscoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],
