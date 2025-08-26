@@ -53,15 +53,25 @@ export class FitScoreController {
   async listCandidates(
     @Request() req,
     @Query('classification') classification?: string,
+    @Query('page') page?: number,
+    @Query('size') size?: number,
   ) {
     try {
+      const currentPage = Number(page) || undefined;
+      const currentSize = Number(size) || undefined;
+
       if (classification) {
         return await this.fitScoreService.findByClassification(
           classification,
           req.user.role,
         );
       }
-      return await this.fitScoreService.findAll(req.user.role);
+
+      return await this.fitScoreService.findAll(
+        req.user.role,
+        currentPage,
+        currentSize,
+      );
     } catch (error) {
       logError(error, 'FitScoreController.listCandidates');
       throw error;

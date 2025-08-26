@@ -11,6 +11,12 @@ import { User } from '../users/entities/user.entity';
 import { UserRole } from '../../common/enum/role.enum';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../../common/enum/notification.enum';
+import {
+  PaginationDto,
+  PaginationMetaDto,
+} from '../../common/dto/pagination.dto';
+import { DEFAULT_PAGINATION } from '../../common/constants/pagination.const';
+import { FitScoreResponseDto } from './dto/fitscore-response.dto';
 
 @Injectable()
 export class FitScoreService {
@@ -68,44 +74,84 @@ export class FitScoreService {
         `Seu FitScore foi calculado: ${description} (Média: ${totalScore.toFixed(2)})`,
       );
 
-      return savedFitScore;
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        select: ['id', 'name', 'email', 'role', 'createdAt'],
+      });
+
+      return { ...savedFitScore, user };
     } catch (error) {
       logError(error, 'FitScoreService.create');
       throw error;
     }
   }
+
   async findByUser(userId: number, userRole: UserRole) {
     try {
       if (userRole !== UserRole.RECRUITER && userRole !== UserRole.CANDIDATE) {
         throw new ForbiddenException('Access denied');
       }
 
-      const result = await this.fitScoreRepo.findOne({ where: { userId } });
-      return result || {};
+      const fitScore = await this.fitScoreRepo.findOne({ where: { userId } });
+
+      if (!fitScore) return {};
+
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        select: ['id', 'name', 'email', 'role', 'createdAt'],
+      });
+
+      return { ...fitScore, user };
     } catch (error) {
       logError(error, 'FitScoreService.findByUser');
       return {};
     }
   }
 
-  async findAll(userRole: UserRole) {
-    try {
-      if (userRole !== UserRole.RECRUITER) {
-        throw new ForbiddenException(
-          'Access denied: only recruiters can view all candidates',
-        );
-      }
+  async findAll(
+    userRole: UserRole,
+    page = DEFAULT_PAGINATION.PAGE,
+    size = DEFAULT_PAGINATION.SIZE,
+  ): Promise<PaginationDto<FitScoreResponseDto>> {
+    if (userRole !== UserRole.RECRUITER) {
+      throw new ForbiddenException(
+        'Access denied: only recruiters can view all candidates',
+      );
+    }
 
-      const result = await this.fitScoreRepo.find({ relations: ['user'] });
-      return result.length ? result : [];
+    try {
+      const [data, totalItems] = await this.fitScoreRepo.findAndCount({
+        relations: ['user'],
+        order: { id: 'DESC' },
+        skip: (page - 1) * size,
+        take: size,
+      });
+
+      const totalPages = Math.ceil(totalItems / size);
+
+      const metadata: PaginationMetaDto = {
+        page,
+        size,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
+
+      const sanitizedData: FitScoreResponseDto[] = data.map((fit) => {
+        const { passwordHash, ...user } = fit.user || {};
+        return {
+          ...fit,
+          classification: fit.classification as FitScoreClassification,
+          user,
+        };
+      });
+
+      return { data: sanitizedData, metadata };
     } catch (error) {
       logError(error, 'FitScoreService.findAll');
 
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-
-      throw new Error('Internal server error');
+      throw error;
     }
   }
 
