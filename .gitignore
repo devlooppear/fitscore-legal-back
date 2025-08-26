@@ -64,3 +64,4 @@ pnpm-lock.yaml
 src/migrations
 
 .vscode/settings.json
+.env.production
