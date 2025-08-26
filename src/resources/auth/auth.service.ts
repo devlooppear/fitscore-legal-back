@@ -1,9 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto/create-user.dto';
 import { logError } from '../../common/util/log.util';
+import { isStrongPassword } from '../../common/util/auth.util';
 
 @Injectable()
 export class AuthService {
@@ -42,12 +47,26 @@ export class AuthService {
 
   async register(createUserDto: CreateUserDto) {
     try {
+      const { password } = createUserDto;
+
+      if (!isStrongPassword(password)) {
+        throw new BadRequestException({
+          message:
+            'Password too weak. It must contain at least 8 characters, including uppercase, lowercase, number, and special character.',
+        });
+      }
+
       const user = await this.usersService.create(createUserDto);
       const { passwordHash, ...result } = user;
       return result;
     } catch (error) {
       logError(error, 'AuthService.register');
-      throw new UnauthorizedException('Registration failed');
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new BadRequestException({ message: 'Registration failed' });
     }
   }
 }
