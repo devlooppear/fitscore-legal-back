@@ -8,12 +8,21 @@ import { AuthModule } from './resources/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { FitscoreModule } from './resources/fitscore/fitscore.module';
 import { NotificationsModule } from './resources/notifications/notifications.module';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 
 @Module({
   imports: [
-     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      ...typeOrmConfig,
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRoot({ ...typeOrmConfig }),
+    ThrottlerModule.forRootAsync({
+      useFactory: (): ThrottlerModuleOptions => ({
+        throttlers: [
+          {
+            ttl: 60,
+            limit: 1000,
+          },
+        ],
+      }),
     }),
     UsersModule,
     AuthModule,
