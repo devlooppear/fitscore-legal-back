@@ -15,7 +15,9 @@ import { Notification } from './entities/notification.entity';
 import { UserRole } from '../../common/enum/role.enum';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { DEFAULT_PAGINATION } from '../../common/constants/pagination.const';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('notifications')
 export class NotificationsController {

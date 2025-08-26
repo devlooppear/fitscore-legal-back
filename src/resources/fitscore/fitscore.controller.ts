@@ -11,7 +11,9 @@ import {
 import { FitScoreService } from './fitscore.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { logError } from '../../common/util/log.util';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('fitscore')
 export class FitScoreController {
