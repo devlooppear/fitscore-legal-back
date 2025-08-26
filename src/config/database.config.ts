@@ -20,9 +20,9 @@ try {
   typeOrmConfig = {
     type: 'postgres',
     url: DATABASE_URL,
-    synchronize: ENVIRONMENT === Environment.LOCAL,
-    logging: ENVIRONMENT === Environment.LOCAL,
-    entities: [path.resolve(__dirname, '../resources/entities/*.{ts,js}')],
+    synchronize: true,
+    logging: ENVIRONMENT == Environment.LOCAL,
+    entities: [path.resolve(__dirname, '../resources/**/*.entity.{ts,js}')],
     migrations: [path.resolve(__dirname, '../migrations/*{.ts,.js}')],
     migrationsRun: false,
   };
