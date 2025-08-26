@@ -1,0 +1,4 @@
+export enum NotificationType {
+  RESULTADO = 'RESULTADO',
+  RELATORIO_APROVADOS = 'RELATORIO_APROVADOS',
+}

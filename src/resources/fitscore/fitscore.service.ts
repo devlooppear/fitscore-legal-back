@@ -1,19 +1,27 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FitScoreClassification } from '../../common/enum/classification.enum';
+import {
+  FitScoreClassification,
+  FitScoreDescriptions,
+} from '../../common/enum/classification.enum';
 import { logError } from '../../common/util/log.util';
 import { FitScore } from './entities/fitscore.entity';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../../common/enum/role.enum';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../../common/enum/notification.enum';
 
 @Injectable()
 export class FitScoreService {
   constructor(
     @InjectRepository(FitScore)
     private fitScoreRepo: Repository<FitScore>,
+
     @InjectRepository(User)
     private userRepo: Repository<User>,
+
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -50,13 +58,22 @@ export class FitScoreService {
         classification,
       });
 
-      return await this.fitScoreRepo.save(fitScore);
+      const savedFitScore = await this.fitScoreRepo.save(fitScore);
+
+      const description = FitScoreDescriptions[classification];
+
+      await this.notificationsService.create(
+        userId,
+        NotificationType.RESULTADO,
+        `Seu FitScore foi calculado: ${description} (Média: ${totalScore.toFixed(2)})`,
+      );
+
+      return savedFitScore;
     } catch (error) {
       logError(error, 'FitScoreService.create');
       throw error;
     }
   }
-
   async findByUser(userId: number, userRole: UserRole) {
     try {
       if (userRole !== UserRole.RECRUITER && userRole !== UserRole.CANDIDATE) {

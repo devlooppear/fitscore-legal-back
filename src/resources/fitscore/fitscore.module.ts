@@ -4,10 +4,11 @@ import { FitScoreService } from './fitscore.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FitScore } from './entities/fitscore.entity';
 import { User } from '../users/entities/user.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FitScore, User])],
+  imports: [TypeOrmModule.forFeature([FitScore, User]), NotificationsModule],
   controllers: [FitScoreController],
-  providers: [FitScoreService]
+  providers: [FitScoreService],
 })
 export class FitscoreModule {}
