@@ -15,27 +15,28 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  app.enableCors({
-    origin: '*',
-    methods: [
-      'GET',
-      'HEAD',
-      'PUT',
-      'PATCH',
-      'POST',
-      'DELETE',
-      'OPTIONS',
-      'CONNECT',
-      'TRACE',
-    ],
-    allowedHeaders: '*',
-    credentials: true,
-  });
+  const environment = process.env.ENVIRONMENT as Environment;
+
+  if (environment === Environment.PRODUCTION) {
+    app.enableCors({
+      origin: ['https://fitscore-legal-front.vercel.app'],
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: '*',
+      credentials: true,
+    });
+  } else {
+    app.enableCors({
+      origin: '*',
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: '*',
+      credentials: true,
+    });
+  }
 
   const dataSource = new DataSource(typeOrmConfig);
   await dataSource.initialize();
 
-  if (process.env.ENVIRONMENT === Environment.LOCAL) {
+  if (environment === Environment.LOCAL) {
     console.log('Database connected');
 
     const config = new DocumentBuilder()
@@ -58,7 +59,7 @@ async function bootstrap() {
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
   await app.listen(port);
 
-  if (process.env.ENVIRONMENT === Environment.LOCAL) {
+  if (environment === Environment.LOCAL) {
     console.log(`Server running on port ${port}`);
   }
 }
