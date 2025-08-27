@@ -13,6 +13,13 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
+  async getProfileById(id: number): Promise<any> {
+    const user = await this.findById(id);
+    if (!user) return null;
+    const { passwordHash, id: userId, ...userData } = user;
+    return { userId, ...userData };
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const passwordHash = await bcrypt.hash(createUserDto.password, 10);
     const user = this.usersRepository.create({
