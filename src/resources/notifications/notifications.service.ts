@@ -2,7 +2,6 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
-import { UserRole } from '../../common/enum/role.enum';
 import {
   PaginationDto,
   PaginationMetaDto,

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste WebSocket Notificações</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Testar WebSocket de Notificações</h1>
+  <button onclick="findAll()">Buscar Todas</button>
+  <button onclick="findByUser()">Buscar por Usuário</button>
+  <input id="userId" type="number" placeholder="User ID" />
+  <pre id="output"></pre>
+  <script>
+    let socket;
+    let jwtToken = '';
+    window.onload = function() {
+      jwtToken = window.prompt('Insira seu JWT token para autenticação:');
+      if (!jwtToken) {
+        alert('Token JWT é obrigatório para testar!');
+        return;
+      }
+      socket = io('http://localhost:5780/notifications', {
+        transports: ['websocket'],
+        extraHeaders: {
+          authorization: 'Bearer ' + jwtToken
+        }
+      });
+      socket.on('connect', () => {
+        document.getElementById('output').textContent += 'Conectado!\n';
+      });
+      socket.on('notifications', (data) => {
+        document.getElementById('output').textContent += JSON.stringify(data, null, 2) + '\n';
+      });
+      socket.on('notifications_error', (data) => {
+        document.getElementById('output').textContent += 'Erro: ' + JSON.stringify(data) + '\n';
+      });
+    };
+    function findAll() {
+      if (!socket) return;
+      socket.emit('findAll', {});
+    }
+    function findByUser() {
+      if (!socket) return;
+      const userId = Number(document.getElementById('userId').value);
+      if (!userId) {
+        alert('Informe um User ID válido!');
+        return;
+      }
+      socket.emit('findByUser', { userId });
+    }
+  </script>
+</body>
+</html>

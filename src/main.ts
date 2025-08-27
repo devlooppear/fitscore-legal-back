@@ -5,13 +5,21 @@ import { typeOrmConfig } from './config/database.config';
 import * as dotenv from 'dotenv';
 import { Environment } from './common/enum/environments.enum';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   app.setGlobalPrefix('api');
+
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*',
+  });
 
   const dataSource = new DataSource(typeOrmConfig);
   await dataSource.initialize();
