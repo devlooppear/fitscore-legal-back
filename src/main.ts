@@ -15,11 +15,24 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,PUT,PATCH,POST,DELETE',
-    allowedHeaders: '*',
-  });
+  if (process.env.ENVIRONMENT === Environment.PRODUCTION) {
+    app.enableCors({
+      origin: [
+        'https://fitscore-legal-front.vercel.app',
+        'https://www.fitscore-legal-front.vercel.app',
+        'https://fitscore-legal-front.vercel.app/',
+        'https://www.fitscore-legal-front.vercel.app/'
+      ],
+      methods: 'GET,PUT,PATCH,POST,DELETE',
+      allowedHeaders: '*',
+    });
+  } else {
+    app.enableCors({
+      origin: '*',
+      methods: 'GET,PUT,PATCH,POST,DELETE',
+      allowedHeaders: '*',
+    });
+  }
 
   const dataSource = new DataSource(typeOrmConfig);
   await dataSource.initialize();
