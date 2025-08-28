@@ -18,8 +18,12 @@ async function bootstrap() {
   const environment = process.env.ENVIRONMENT as Environment;
 
   app.enableCors({
-    origin: true,
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   const dataSource = new DataSource(typeOrmConfig);
