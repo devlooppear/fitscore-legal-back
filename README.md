@@ -1,24 +1,46 @@
-📌 Entidades e Atributos
-User
+# 🏗️ Mini FitScore LEGAL™ — Backend
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)  
+[![License](https://img.shields.io/badge/license-MIT-blue)](#)  
+[![Backend](https://img.shields.io/badge/backend-NestJS-orange)](https://nestjs.com/)  
+[![Database](https://img.shields.io/badge/database-Supabase-blueviolet)](https://supabase.com/)  
+
+---
+
+## 📌 Descrição
+O **Mini FitScore LEGAL™** é uma versão simplificada do algoritmo de avaliação de candidatos, baseado em **Performance, Energia e Cultura**.  
+
+O backend é responsável por:
+- Persistir usuários e FitScores
+- Calcular classificações automaticamente
+- Enviar notificações assíncronas
+- Suportar dashboard de recrutadores
+
+---
+
+## 📌 Entidades e Atributos
+
+### 👤 User
 Usuário base (candidato ou recrutador).
 
+```ts
 User {
   id: number (PK)
   name: string
   email: string (unique)
   passwordHash: string
-  role: 'CANDIDATE' | 'RECRUITER'
+  role: 'CANDIDATE' | 'RECRUITER' // padrão CANDIDATE
   createdAt: Date
 }
+```
 
-FitScore
-
+## 🧮 FitScore
 Respostas agregadas do formulário.
 
+```ts
 FitScore {
   id: number (PK)
-  userId: number (FK → User.id, role='CANDIDATE')
+  userId: number (FK → User.id)
   performance: number   // 0–100
   energy: number        // 0–100
   culture: number       // 0–100
@@ -26,11 +48,11 @@ FitScore {
   classification: 'FIT_ALTISSIMO' | 'FIT_APROVADO' | 'FIT_QUESTIONAVEL' | 'FORA_DO_PERFIL'
   createdAt: Date
 }
-
-Notification
-
+```
+## 🔔 Notification
 Registra notificações enviadas.
 
+```ts
 Notification {
   id: number (PK)
   userId: number (FK → User.id)
@@ -38,50 +60,55 @@ Notification {
   message: string
   sentAt: Date
 }
+```
 
-📌 Endpoints da API
-🔐 Auth
+## 📌 Endpoints da API
 
-POST /auth/register
-Cadastra um novo usuário.
+### 🔐 Auth
+POST /auth/register – Cadastra um novo usuário.
 
+```json
 {
   "name": "João Silva",
   "email": "joao@email.com",
   "password": "123456",
   "role": "CANDIDATE"
 }
+```
+POST /auth/login – Retorna token JWT.
 
-
-POST /auth/login
-Retorna token JWT.
-
+```json
 {
   "email": "joao@email.com",
   "password": "123456"
 }
+```
+### 👤 Users
+GET /users/me – Retorna informações do usuário logado.
 
+```json
+{
+  "id": 1,
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "role": "CANDIDATE",
+  "createdAt": "2025-08-26T10:00:00Z"
+}
+```
 
-POST /auth/logout
-Invalida sessão (ex.: blacklist do token).
+### 🧮 FitScore
+POST /fitscore – Cria um FitScore para o candidato.
 
-👤 Candidate (autoatendimento)
-
-POST /fitscore
-Candidato envia respostas já agregadas.
-
+```json
 {
   "performance": 80,
   "energy": 70,
   "culture": 90
 }
+```
+GET /fitscore/me – Consulta o resultado do próprio FitScore.
 
-
-→ Backend calcula totalScore + classification, salva e notifica candidato.
-
-GET /fitscore/me
-Consulta o resultado do próprio FitScore.
-
+```json
 {
   "performance": 80,
   "energy": 70,
@@ -89,33 +116,12 @@ Consulta o resultado do próprio FitScore.
   "totalScore": 80,
   "classification": "FIT_ALTISSIMO"
 }
+```
+GET /fitscore/candidates – Lista candidatos avaliados (filtros opcionais).
 
-📊 Recruiter (dashboard)
+GET /fitscore/candidates/:id – Detalhes de um candidato específico.
 
-GET /candidates
-Lista candidatos avaliados (pode filtrar por classificação).
-
-GET /candidates?classification=FIT_APROVADO
-
-
-Response:
-
-[
-  {
-    "id": 1,
-    "name": "João Silva",
-    "email": "joao@email.com",
-    "fitScore": {
-      "totalScore": 75,
-      "classification": "FIT_APROVADO"
-    }
-  }
-]
-
-
-GET /candidates/:id
-Detalhes completos de um candidato.
-
+```json
 {
   "id": 1,
   "name": "João Silva",
@@ -129,12 +135,12 @@ Detalhes completos de um candidato.
   },
   "createdAt": "2025-08-26T10:00:00Z"
 }
+```
 
-🔔 Notifications
+### 🔔 Notifications
+GET /notifications – Lista notificações recebidas pelo usuário.
 
-GET /notifications/me
-Lista notificações recebidas pelo usuário (candidato ou recrutador).
-
+```json
 [
   {
     "id": 1,
@@ -143,15 +149,66 @@ Lista notificações recebidas pelo usuário (candidato ou recrutador).
     "sentAt": "2025-08-26T12:00:00Z"
   }
 ]
+```
 
-📌 Resumo do Fluxo
+## ⚡ Lógica Assíncrona — Trigger de FitScore
+Quando um candidato envia seu FitScore, o backend executa uma lógica assíncrona para calcular, salvar e notificar.
 
-Candidato registra/login → responde formulário → POST /fitscore.
+### 📝 Passo a passo do processo
+Validação do usuário
+
+Apenas usuários com role: CANDIDATE podem enviar respostas.
+
+Caso contrário, é lançada uma exceção ForbiddenException.
+
+Cálculo do FitScore
+
+Média das três dimensões: performance, energy, culture.
+
+Determinação da classificação (classification) baseada na média:
+
+```
+  FIT_ALTISSIMO: ≥ 80
+
+  FIT_APROVADO: 60–79
+
+  FIT_QUESTIONAVEL: 40–59
+
+  FORA_DO_PERFIL: < 40
+```
+
+### 💾 Persistência
+
+Cria e salva o registro no banco de dados (fitscores).
+
+Trigger assíncrono de notificação
+
+Após salvar o FitScore, o serviço chama NotificationsService.create.
+
+Tipo da notificação: RESULTADO.
+
+Mensagem enviada ao candidato com classificação e média.
+
+## Resposta
+
+Retorna o FitScore criado junto com os dados básicos do usuário.
+
+### 📌 Fluxo Resumido
+Candidato registra/login → envia formulário → POST /fitscore.
 
 Backend calcula totalScore + classification → salva FitScore → cria Notification para candidato.
 
-Candidato pode consultar seu resultado em /fitscore/me.
+Candidato consulta seu resultado em /fitscore/me.
 
-Recrutador acessa /candidates (lista) e /candidates/:id (detalhes com scores).
+Recrutador acessa /fitscore/candidates (lista) e /fitscore/candidates/:id (detalhes).
 
-Processo assíncrono gera relatório de aprovados (≥80) → notifica gestor (RELATORIO_APROVADOS).
+Processo assíncrono gera relatório de aprovados (totalScore ≥ 80) → notifica gestor (RELATORIO_APROVADOS).
+
+## ⚙️ Tecnologias
+Backend: NestJS, TypeORM, PostgreSQL (Supabase)
+
+Autenticação: JWT
+
+Notificações: Trigger assíncrono via service
+
+Estilo de código: TypeScript + ESLint + Prettier
