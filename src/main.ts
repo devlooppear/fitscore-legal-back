@@ -17,12 +17,25 @@ async function bootstrap() {
 
   const environment = process.env.ENVIRONMENT as Environment;
 
+  const allowedOrigins =
+    environment == Environment.PRODUCTION
+      ? ['https://fitscore-legal-front.vercel.app']
+      : ['*'];
+
   app.enableCors({
     origin: (origin, callback) => {
-      callback(null, true);
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes('*')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS não permitido'));
+      }
     },
     credentials: true,
-    methods: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: '*',
     exposedHeaders: '*',
   });
@@ -30,7 +43,7 @@ async function bootstrap() {
   const dataSource = new DataSource(typeOrmConfig);
   await dataSource.initialize();
 
-  if (environment === Environment.LOCAL) {
+  if (environment !== Environment.PRODUCTION) {
     console.log('Database connected');
 
     const config = new DocumentBuilder()
@@ -42,6 +55,7 @@ async function bootstrap() {
       .setVersion('1.0')
       .addBearerAuth()
       .build();
+
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api-docs', app, document);
 
@@ -53,7 +67,7 @@ async function bootstrap() {
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
   await app.listen(port);
 
-  if (environment === Environment.LOCAL) {
+  if (environment !== Environment.PRODUCTION) {
     console.log(`Server running on port ${port}`);
   }
 }
