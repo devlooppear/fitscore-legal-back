@@ -1,36 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "src/main.ts",
-      "use": "@vercel/node"
-    }
-  ],
+  "builds": [{ "src": "src/main.ts", "use": "@vercel/node" }],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "src/main.ts",
-      "methods": ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"]
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://fitscore-legal-front.vercel.app" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Accept" },
-        { "key": "Access-Control-Allow-Credentials", "value": "true" }
-      ]
+      "methods": ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
     },
     {
-      "source": "/notifications",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://fitscore-legal-front.vercel.app" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Accept" },
-        { "key": "Access-Control-Allow-Credentials", "value": "true" }
-      ]
+      "src": "/notifications",
+      "dest": "src/main.ts",
+      "methods": ["GET","POST","OPTIONS"]
     }
   ]
 }
