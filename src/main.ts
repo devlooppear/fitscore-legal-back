@@ -17,25 +17,15 @@ async function bootstrap() {
 
   const environment = process.env.ENVIRONMENT as Environment;
 
-  const allowedOrigins =
-    environment == Environment.PRODUCTION
-      ? ['https://fitscore-legal-front.vercel.app']
-      : ['*'];
+  const allowedOrigin =
+    process.env.ENVIRONMENT === Environment.PRODUCTION
+      ? 'https://fitscore-legal-front.vercel.app'
+      : '*';
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        allowedOrigins.includes('*')
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS não permitido'));
-      }
-    },
+    origin: allowedOrigin,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: '*',
     exposedHeaders: '*',
   });
