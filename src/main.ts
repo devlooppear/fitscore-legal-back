@@ -17,21 +17,10 @@ async function bootstrap() {
 
   const environment = process.env.ENVIRONMENT as Environment;
 
-  if (environment === Environment.PRODUCTION) {
-    app.enableCors({
-      origin: ['https://fitscore-legal-front.vercel.app'],
-      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: '*',
-      credentials: true,
-    });
-  } else {
-    app.enableCors({
-      origin: '*',
-      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: '*',
-      credentials: true,
-    });
-  }
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
   const dataSource = new DataSource(typeOrmConfig);
   await dataSource.initialize();
