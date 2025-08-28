@@ -3,14 +3,9 @@
   "builds": [{ "src": "src/main.ts", "use": "@vercel/node" }],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "(.*)",
       "dest": "src/main.ts",
       "methods": ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
-    },
-    {
-      "src": "/notifications",
-      "dest": "src/main.ts",
-      "methods": ["GET","POST","OPTIONS"]
     }
   ]
 }
