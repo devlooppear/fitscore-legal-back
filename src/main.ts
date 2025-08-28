@@ -22,8 +22,9 @@ async function bootstrap() {
       callback(null, true);
     },
     credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    methods: '*',
+    allowedHeaders: '*',
+    exposedHeaders: '*',
   });
 
   const dataSource = new DataSource(typeOrmConfig);
